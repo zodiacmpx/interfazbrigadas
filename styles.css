@@ -1,0 +1,38 @@
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+#sidebar {
+    width: 250px;
+    padding: 10px;
+    background-color: #f4f4f4;
+    overflow-y: auto;
+}
+
+#map {
+    flex: 1;
+    height: 100vh;
+}
+
+#brigade-list {
+    list-style: none;
+    padding: 0;
+}
+
+#brigade-list li {
+    margin-bottom: 10px;
+}
+
+.add-button {
+    padding: 5px 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.add-button:hover {
+    background-color: #0056b3;
+}
