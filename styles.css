@@ -1,38 +1,66 @@
+/* General styles */
 body {
-    margin: 0;
-    padding: 0;
-    display: flex;
-}
-
-#sidebar {
-    width: 250px;
-    padding: 10px;
-    background-color: #f4f4f4;
-    overflow-y: auto;
+    overflow: hidden;
 }
 
 #map {
-    flex: 1;
     height: 100vh;
 }
 
-#brigade-list {
-    list-style: none;
+.sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
     padding: 0;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
 }
 
-#brigade-list li {
-    margin-bottom: 10px;
+.sidebar .sidebar-sticky {
+    position: relative;
+    top: 0;
+    height: calc(100vh - 0px);
+    padding-top: 20px;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
-.add-button {
-    padding: 5px 10px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    cursor: pointer;
+.sidebar-heading {
+    padding: 0.75rem 1rem;
+    font-size: 1.2rem;
+    text-align: center;
 }
 
-.add-button:hover {
-    background-color: #0056b3;
+#brigade-list .list-group-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#map {
+    margin-left: 250px; /* Width of the sidebar */
+}
+
+#details-panel {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 300px;
+    display: none;
+}
+
+@media (max-width: 768px) {
+    #map {
+        margin-left: 0;
+    }
+
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+    }
+
+    #details-panel {
+        width: 90%;
+    }
 }
