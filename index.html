@@ -44,8 +44,20 @@
 
         #brigade-list .list-group-item {
             display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        #brigade-list .brigade-header {
+            display: flex;
             justify-content: space-between;
+            width: 100%;
             align-items: center;
+        }
+
+        #brigade-list .brigade-status {
+            font-size: 0.9rem;
+            color: #555;
         }
 
         #map {
@@ -118,6 +130,7 @@
                         <h5 id="brigade-name">Nombre de la Brigada</h5>
                     </div>
                     <div class="card-body">
+                        <p><strong>Estado:</strong> <span id="brigade-status"></span></p>
                         <p><strong>Velocidad de traslado:</strong> <span id="brigade-speed"></span></p>
                         <p><strong>KPI:</strong> <span id="brigade-kpi" class="kpi-value"></span></p>
                         <p><strong>OA Activada:</strong> <span id="brigade-oa"></span></p>
@@ -148,6 +161,7 @@
                 coords: [-39.8196, -73.2452],
                 speed: 55,
                 kpi: 92,
+                estado: "En traslado",
                 oaActivada: "Sí",
                 plazo: "Dentro de plazo",
                 alertas: "Sin alertas",
@@ -165,6 +179,7 @@
                 coords: [-39.8142, -73.2451],
                 speed: 60,
                 kpi: 70,
+                estado: "Trabajando en el lugar",
                 oaActivada: "No",
                 plazo: "Fuera de plazo",
                 alertas: "Retraso en llegada",
@@ -182,6 +197,7 @@
                 coords: [-39.8088, -73.2450],
                 speed: 58,
                 kpi: 95,
+                estado: "En colación",
                 oaActivada: "Sí",
                 plazo: "Dentro de plazo",
                 alertas: "Sin alertas",
@@ -200,6 +216,7 @@
                 coords: [-40.5741, -73.1144],
                 speed: 52,
                 kpi: 88,
+                estado: "En traslado",
                 oaActivada: "No",
                 plazo: "Dentro de plazo",
                 alertas: "Sin alertas",
@@ -217,6 +234,7 @@
                 coords: [-40.5690, -73.1120],
                 speed: 57,
                 kpi: 65,
+                estado: "Trabajando en el lugar",
                 oaActivada: "Sí",
                 plazo: "Dentro de plazo",
                 alertas: "Sin alertas",
@@ -234,6 +252,7 @@
                 coords: [-40.5639, -73.1096],
                 speed: 54,
                 kpi: 45,
+                estado: "En colación",
                 oaActivada: "No",
                 plazo: "Fuera de plazo",
                 alertas: "Demora en respuesta",
@@ -252,6 +271,7 @@
                 coords: [-41.4689, -72.9411],
                 speed: 59,
                 kpi: 91,
+                estado: "En traslado",
                 oaActivada: "Sí",
                 plazo: "Dentro de plazo",
                 alertas: "Sin alertas",
@@ -269,6 +289,7 @@
                 coords: [-41.4638, -72.9387],
                 speed: 56,
                 kpi: 75,
+                estado: "Trabajando en el lugar",
                 oaActivada: "No",
                 plazo: "Dentro de plazo",
                 alertas: "Sin alertas",
@@ -286,6 +307,7 @@
                 coords: [-41.4587, -72.9363],
                 speed: 61,
                 kpi: 30,
+                estado: "En colación",
                 oaActivada: "Sí",
                 plazo: "Fuera de plazo",
                 alertas: "Desvío de ruta",
@@ -335,6 +357,7 @@
             // Agregar indicadores al marcador
             const popupContent = `
                 <strong>${brigade.name}</strong><br>
+                Estado: ${brigade.estado}<br>
                 Velocidad: ${brigade.speed} km/h<br>
                 KPI: <span class="${getKpiColor(brigade.kpi)}">${brigade.kpi}%</span>
             `;
@@ -348,16 +371,18 @@
                 showDetails(brigade);
             });
 
-            // Simular movimiento en tiempo real
-            let index = 0;
-            setInterval(() => {
-                if (index < brigade.path.length) {
-                    marker.setLatLng(brigade.path[index]);
-                    index++;
-                } else {
-                    index = 0; // Reiniciar para que se repita
-                }
-            }, 2000); // Actualiza cada 2 segundos
+            // Simular movimiento en tiempo real si está en traslado
+            if (brigade.estado === "En traslado") {
+                let index = 0;
+                setInterval(() => {
+                    if (index < brigade.path.length) {
+                        marker.setLatLng(brigade.path[index]);
+                        index++;
+                    } else {
+                        index = 0; // Reiniciar para que se repita
+                    }
+                }, 2000); // Actualiza cada 2 segundos
+            }
         }
 
         // Función para agregar brigada desde la lista
@@ -380,6 +405,9 @@
                 const listItem = document.createElement('li');
                 listItem.className = 'list-group-item';
 
+                const headerDiv = document.createElement('div');
+                headerDiv.className = 'brigade-header';
+
                 const nameSpan = document.createElement('span');
                 nameSpan.textContent = brigade.name;
 
@@ -388,8 +416,15 @@
                 addButton.className = "btn btn-primary btn-sm";
                 addButton.onclick = () => addBrigade(brigade.id);
 
-                listItem.appendChild(nameSpan);
-                listItem.appendChild(addButton);
+                headerDiv.appendChild(nameSpan);
+                headerDiv.appendChild(addButton);
+
+                const statusSpan = document.createElement('span');
+                statusSpan.textContent = `Estado: ${brigade.estado}`;
+                statusSpan.className = 'brigade-status';
+
+                listItem.appendChild(headerDiv);
+                listItem.appendChild(statusSpan);
                 listElement.appendChild(listItem);
             });
         }
@@ -397,6 +432,7 @@
         // Mostrar detalles de la brigada
         function showDetails(brigade) {
             document.getElementById('brigade-name').textContent = brigade.name;
+            document.getElementById('brigade-status').textContent = brigade.estado;
             document.getElementById('brigade-speed').textContent = brigade.speed + ' km/h';
 
             const kpiElement = document.getElementById('brigade-kpi');
@@ -410,10 +446,14 @@
             // Mostrar el panel de detalles
             document.getElementById('details-panel').style.display = 'block';
 
-            // Mostrar desplazamiento
-            const path = L.polyline(brigade.path, { color: 'blue' }).addTo(map);
-            // Zoom al área del desplazamiento
-            map.fitBounds(path.getBounds());
+            // Mostrar desplazamiento si está en traslado
+            if (brigade.estado === "En traslado") {
+                const path = L.polyline(brigade.path, { color: 'blue' }).addTo(map);
+                // Zoom al área del desplazamiento
+                map.fitBounds(path.getBounds());
+            } else {
+                map.setView(brigade.coords, 13);
+            }
         }
 
         // Filtrar brigadas
@@ -421,7 +461,7 @@
             const query = document.getElementById('search-input').value.toLowerCase();
             const listItems = document.querySelectorAll('#brigade-list .list-group-item');
             listItems.forEach(item => {
-                const brigadeName = item.firstChild.textContent.toLowerCase();
+                const brigadeName = item.querySelector('.brigade-header span').textContent.toLowerCase();
                 if (brigadeName.includes(query)) {
                     item.style.display = '';
                 } else {
@@ -436,8 +476,5 @@
         // Inicializar la aplicación
         loadBrigadeList();
     </script>
-</body>
-</html>
-
 </body>
 </html>
