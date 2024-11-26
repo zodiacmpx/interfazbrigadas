@@ -45,22 +45,19 @@
         }
 
         #brigade-list .list-group-item {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
             cursor: pointer;
         }
 
         #brigade-list .brigade-header {
             display: flex;
             justify-content: space-between;
-            width: 100%;
             align-items: center;
         }
 
-        #brigade-list .brigade-status {
+        #brigade-list .brigade-info {
             font-size: 0.9rem;
             color: #555;
+            margin-top: 5px;
         }
 
         #map {
@@ -114,17 +111,9 @@
             background-color: #e9f7ef; /* Light green background */
         }
 
-        /* Styles for the small detail panel in the list */
-        .brigade-details {
-            display: none;
-            padding: 10px;
-            background-color: #f0f0f0;
-            width: 100%;
-            border-top: 1px solid #ccc;
-        }
-
-        .brigade-details p {
-            margin: 0;
+        /* Highlighted marker */
+        .highlight-marker {
+            transform: scale(1.5);
         }
     </style>
 </head>
@@ -193,11 +182,122 @@
                     [-39.8596, -73.2852]
                 ]
             },
-            // ... (resto de las brigadas)
+            {
+                id: 2,
+                name: "Brigada Valdivia 2",
+                coords: [-39.8142, -73.2451],
+                speed: 60,
+                kpi: 70,
+                estado: "Trabajando en el lugar",
+                oaActivada: "No",
+                plazo: "Fuera de plazo",
+                alertas: "Retraso en llegada",
+                path: [
+                    [-39.8142, -73.2451],
+                    [-39.8242, -73.2551],
+                    [-39.8342, -73.2651],
+                    [-39.8442, -73.2751],
+                    [-39.8542, -73.2851]
+                ]
+            },
+            // Brigadas en Osorno
+            {
+                id: 3,
+                name: "Brigada Osorno 1",
+                coords: [-40.5741, -73.1144],
+                speed: 52,
+                kpi: 88,
+                estado: "En traslado",
+                oaActivada: "No",
+                plazo: "Dentro de plazo",
+                alertas: "Sin alertas",
+                path: [
+                    [-40.5741, -73.1144],
+                    [-40.5841, -73.1244],
+                    [-40.5941, -73.1344],
+                    [-40.6041, -73.1444],
+                    [-40.6141, -73.1544]
+                ]
+            },
+            {
+                id: 4,
+                name: "Brigada Osorno 2",
+                coords: [-40.5690, -73.1120],
+                speed: 57,
+                kpi: 65,
+                estado: "Trabajando en el lugar",
+                oaActivada: "Sí",
+                plazo: "Dentro de plazo",
+                alertas: "Sin alertas",
+                path: [
+                    [-40.5690, -73.1120],
+                    [-40.5790, -73.1220],
+                    [-40.5890, -73.1320],
+                    [-40.5990, -73.1420],
+                    [-40.6090, -73.1520]
+                ]
+            },
+            // Brigadas en Temuco
+            {
+                id: 5,
+                name: "Brigada Temuco 1",
+                coords: [-38.7359, -72.5901],
+                speed: 60,
+                kpi: 85,
+                estado: "En traslado",
+                oaActivada: "Sí",
+                plazo: "Dentro de plazo",
+                alertas: "Sin alertas",
+                path: [
+                    [-38.7359, -72.5901],
+                    [-38.7459, -72.6001],
+                    [-38.7559, -72.6101],
+                    [-38.7659, -72.6201],
+                    [-38.7759, -72.6301]
+                ]
+            },
+            {
+                id: 6,
+                name: "Brigada Temuco 2",
+                coords: [-38.7400, -72.5950],
+                speed: 58,
+                kpi: 78,
+                estado: "Trabajando en el lugar",
+                oaActivada: "No",
+                plazo: "Fuera de plazo",
+                alertas: "Retraso en inicio",
+                path: [
+                    [-38.7400, -72.5950],
+                    [-38.7500, -72.6050],
+                    [-38.7600, -72.6150],
+                    [-38.7700, -72.6250],
+                    [-38.7800, -72.6350]
+                ]
+            },
+            // Más brigadas en Osorno
+            {
+                id: 7,
+                name: "Brigada Osorno 3",
+                coords: [-40.5639, -73.1096],
+                speed: 54,
+                kpi: 45,
+                estado: "En colación",
+                oaActivada: "No",
+                plazo: "Fuera de plazo",
+                alertas: "Demora en respuesta",
+                path: [
+                    [-40.5639, -73.1096],
+                    [-40.5739, -73.1196],
+                    [-40.5839, -73.1296],
+                    [-40.5939, -73.1396],
+                    [-40.6039, -73.1496]
+                ]
+            },
+            // Puedes agregar más brigadas si lo deseas
         ];
 
         // Inicializar el mapa centrado en la zona sur de Chile
-        const map = L.map('map').setView([-40.5, -73.0], 7);
+        const map = L.map('map').setView([-39.5, -72.5], 7);
 
         // Añadir capa de mapa
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -244,19 +344,6 @@
             marker.on('click', function () {
                 showDetails(brigade);
             });
-
-            // Simular movimiento en tiempo real si está en traslado
-            if (brigade.estado === "En traslado") {
-                let index = 0;
-                setInterval(() => {
-                    if (index < brigade.path.length) {
-                        marker.setLatLng(brigade.path[index]);
-                        index++;
-                    } else {
-                        index = 0; // Reiniciar para que se repita
-                    }
-                }, 2000); // Actualiza cada 2 segundos
-            }
         }
 
         // Función para activar brigada desde la lista
@@ -269,12 +356,6 @@
                     // Marcar la brigada como activada en la lista
                     const listItem = document.getElementById('brigade-item-' + id);
                     listItem.classList.add('activated');
-
-                    // Mostrar pequeño detalle debajo de la brigada en la lista
-                    const detailsDiv = listItem.querySelector('.brigade-details');
-                    detailsDiv.style.display = 'block';
-                } else {
-                    alert("Esta brigada ya está activada.");
                 }
             }
         }
@@ -304,41 +385,30 @@
                 headerDiv.appendChild(nameSpan);
                 headerDiv.appendChild(addButton);
 
-                const statusSpan = document.createElement('span');
-                statusSpan.textContent = `Estado: ${brigade.estado}`;
-                statusSpan.className = 'brigade-status';
-
-                // Pequeño detalle con los datos generales
-                const detailsDiv = document.createElement('div');
-                detailsDiv.className = 'brigade-details';
-
-                const kpiSpan = document.createElement('span');
-                kpiSpan.textContent = `KPI: ${brigade.kpi}%`;
-                kpiSpan.className = getKpiColor(brigade.kpi);
-
-                detailsDiv.innerHTML = `
-                    <p><strong>Velocidad:</strong> ${brigade.speed} km/h</p>
-                    <p><strong>KPI:</strong> <span class="${getKpiColor(brigade.kpi)}">${brigade.kpi}%</span></p>
-                    <p><strong>OA Activada:</strong> ${brigade.oaActivada}</p>
-                    <p><strong>Plazo:</strong> ${brigade.plazo}</p>
-                    <p><strong>Alertas:</strong> ${brigade.alertas}</p>
+                // Información adicional debajo del nombre
+                const infoDiv = document.createElement('div');
+                infoDiv.className = 'brigade-info';
+                infoDiv.innerHTML = `
+                    KPI: <span class="${getKpiColor(brigade.kpi)}">${brigade.kpi}%</span><br>
+                    Estado: ${brigade.estado}
                 `;
 
                 listItem.appendChild(headerDiv);
-                listItem.appendChild(statusSpan);
-                listItem.appendChild(detailsDiv);
+                listItem.appendChild(infoDiv);
                 listElement.appendChild(listItem);
 
-                // Evento al pasar el mouse por encima
+                // Evento al pasar el mouse sobre el elemento de la lista
                 listItem.addEventListener('mouseenter', () => {
-                    // Si la brigada está activada, mostrar el detalle
-                    if (listItem.classList.contains('activated')) {
-                        detailsDiv.style.display = 'block';
+                    // Resaltar el marcador en el mapa si está activado
+                    if (brigadeMarkers[brigade.id]) {
+                        brigadeMarkers[brigade.id].getElement().classList.add('highlight-marker');
                     }
                 });
 
                 listItem.addEventListener('mouseleave', () => {
-                    detailsDiv.style.display = 'none';
+                    if (brigadeMarkers[brigade.id]) {
+                        brigadeMarkers[brigade.id].getElement().classList.remove('highlight-marker');
+                    }
                 });
 
                 // Evento al hacer clic en el elemento de la lista
@@ -371,6 +441,8 @@
             // Centrar el mapa en la brigada
             if (brigadeMarkers[brigade.id]) {
                 map.setView(brigadeMarkers[brigade.id].getLatLng(), 13);
+                // Abrir el popup
+                brigadeMarkers[brigade.id].openPopup();
             }
         }
 
@@ -396,3 +468,4 @@
     </script>
 </body>
 </html>
+
