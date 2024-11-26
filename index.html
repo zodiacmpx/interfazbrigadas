@@ -29,39 +29,31 @@
             width: 300px;
         }
 
-        .sidebar .sidebar-sticky {
-            position: relative;
+        .oa-panel {
+            position: fixed;
             top: 0;
-            height: calc(100vh - 0px);
-            padding-top: 20px;
-            overflow-x: hidden;
+            bottom: 0;
+            left: 300px; /* Sidebar width */
+            width: 250px;
+            background-color: #fff;
+            padding: 20px;
             overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: none; /* Hidden by default */
         }
 
-        .sidebar-heading {
-            padding: 0.75rem 1rem;
-            font-size: 1.2rem;
-            text-align: center;
-        }
-
-        #brigade-list .list-group-item {
-            cursor: pointer;
-        }
-
-        #brigade-list .brigade-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        #brigade-list .brigade-info {
-            font-size: 0.9rem;
-            color: #555;
-            margin-top: 5px;
+        .oa-panel h5 {
+            margin-bottom: 20px;
         }
 
         #map {
-            margin-left: 300px; /* Width of the sidebar */
+            margin-left: 300px; /* Sidebar width */
+        }
+
+        /* Adjust map margin when OA panel is visible */
+        .oa-visible #map {
+            margin-left: 550px; /* Sidebar + OA panel width */
         }
 
         #details-panel {
@@ -78,10 +70,14 @@
                 margin-left: 0;
             }
 
-            .sidebar {
+            .sidebar, .oa-panel {
                 width: 100%;
                 height: auto;
                 position: relative;
+            }
+
+            .oa-panel {
+                left: 0;
             }
 
             #details-panel {
@@ -119,36 +115,41 @@
 </head>
 <body>
     <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block sidebar collapse">
-                <div class="sidebar-sticky">
-                    <h5 class="sidebar-heading">Brigadas Disponibles</h5>
-                    <input type="text" id="search-input" class="form-control mb-3" placeholder="Buscar brigada...">
-                    <ul id="brigade-list" class="list-group">
-                        <!-- Lista de brigadas -->
-                    </ul>
-                </div>
-            </nav>
-            <!-- Main Content -->
-            <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-0">
-                <div id="map"></div>
-                <!-- Panel de detalles -->
-                <div id="details-panel" class="card">
-                    <div class="card-header">
-                        <h5 id="brigade-name">Nombre de la Brigada</h5>
-                    </div>
-                    <div class="card-body">
-                        <p><strong>Estado:</strong> <span id="brigade-status"></span></p>
-                        <p><strong>Velocidad de traslado:</strong> <span id="brigade-speed"></span></p>
-                        <p><strong>KPI:</strong> <span id="brigade-kpi" class="kpi-value"></span></p>
-                        <p><strong>OA Activada:</strong> <span id="brigade-oa"></span></p>
-                        <p><strong>Dentro de plazo según densidad:</strong> <span id="brigade-plazo"></span></p>
-                        <p><strong>Alertas/Notificaciones:</strong> <span id="brigade-alertas"></span></p>
-                    </div>
-                </div>
-            </main>
+        <!-- Sidebar -->
+        <nav id="sidebar" class="sidebar">
+            <div class="sidebar-sticky">
+                <h5 class="sidebar-heading">Brigadas Disponibles</h5>
+                <input type="text" id="search-input" class="form-control mb-3" placeholder="Buscar brigada...">
+                <ul id="brigade-list" class="list-group">
+                    <!-- Lista de brigadas -->
+                </ul>
+            </div>
+        </nav>
+        <!-- OA Panel -->
+        <div id="oa-panel" class="oa-panel">
+            <h5>Casos Asignados</h5>
+            <ul id="oa-list" class="list-group">
+                <!-- Lista de OAs -->
+            </ul>
         </div>
+        <!-- Main Content -->
+        <main role="main">
+            <div id="map"></div>
+            <!-- Panel de detalles -->
+            <div id="details-panel" class="card">
+                <div class="card-header">
+                    <h5 id="brigade-name">Nombre de la Brigada</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Estado:</strong> <span id="brigade-status"></span></p>
+                    <p><strong>Velocidad de traslado:</strong> <span id="brigade-speed"></span></p>
+                    <p><strong>KPI:</strong> <span id="brigade-kpi" class="kpi-value"></span></p>
+                    <p><strong>OA Activada:</strong> <span id="brigade-oa"></span></p>
+                    <p><strong>Dentro de plazo según densidad:</strong> <span id="brigade-plazo"></span></p>
+                    <p><strong>Alertas/Notificaciones:</strong> <span id="brigade-alertas"></span></p>
+                </div>
+            </div>
+        </main>
     </div>
 
     <!-- Bootstrap JS and dependencies -->
@@ -180,6 +181,12 @@
                     [-39.8396, -73.2652],
                     [-39.8496, -73.2752],
                     [-39.8596, -73.2852]
+                ],
+                oas: [
+                    { id: 40405056, estado: "En traslado" },
+                    { id: 40405057, estado: "Pendiente" },
+                    { id: 40405058, estado: "Pendiente" },
+                    { id: 40405059, estado: "Pendiente" }
                 ]
             },
             {
@@ -194,8 +201,13 @@
                 alertas: "Retraso en llegada",
                 path: [
                     [-39.8142, -73.2451]
+                ],
+                oas: [
+                    { id: 40405060, estado: "En progreso" },
+                    { id: 40405061, estado: "Pendiente" }
                 ]
             },
+            // Agrega OAs para las demás brigadas...
             // Brigadas en Osorno
             {
                 id: 3,
@@ -213,69 +225,13 @@
                     [-40.5941, -73.1344],
                     [-40.6041, -73.1444],
                     [-40.6141, -73.1544]
+                ],
+                oas: [
+                    { id: 40405062, estado: "En traslado" },
+                    { id: 40405063, estado: "Pendiente" }
                 ]
             },
-            {
-                id: 4,
-                name: "Brigada Osorno 2",
-                coords: [-40.5690, -73.1120],
-                speed: 57,
-                kpi: 65,
-                estado: "Trabajando en el lugar",
-                oaActivada: "Sí",
-                plazo: "Dentro de plazo",
-                alertas: "Sin alertas",
-                path: [
-                    [-40.5690, -73.1120]
-                ]
-            },
-            {
-                id: 5,
-                name: "Brigada Temuco 1",
-                coords: [-38.7359, -72.5901],
-                speed: 60,
-                kpi: 85,
-                estado: "En traslado",
-                oaActivada: "Sí",
-                plazo: "Dentro de plazo",
-                alertas: "Sin alertas",
-                path: [
-                    [-38.7359, -72.5901],
-                    [-38.7459, -72.6001],
-                    [-38.7559, -72.6101],
-                    [-38.7659, -72.6201],
-                    [-38.7759, -72.6301]
-                ]
-            },
-            {
-                id: 6,
-                name: "Brigada Temuco 2",
-                coords: [-38.7400, -72.5950],
-                speed: 58,
-                kpi: 78,
-                estado: "Trabajando en el lugar",
-                oaActivada: "No",
-                plazo: "Fuera de plazo",
-                alertas: "Retraso en inicio",
-                path: [
-                    [-38.7400, -72.5950]
-                ]
-            },
-            {
-                id: 7,
-                name: "Brigada Osorno 3",
-                coords: [-40.5639, -73.1096],
-                speed: 54,
-                kpi: 45,
-                estado: "En colación",
-                oaActivada: "No",
-                plazo: "Fuera de plazo",
-                alertas: "Demora en respuesta",
-                path: [
-                    [-40.5639, -73.1096]
-                ]
-            },
-            // Agregar más brigadas si lo deseas
+            // ... Otras brigadas
         ];
 
         // Inicializar el mapa centrado en la zona sur de Chile
@@ -417,9 +373,9 @@
 
                 // Evento al hacer clic en el elemento de la lista
                 listItem.addEventListener('click', () => {
-                    // Si la brigada está activada, mostrar detalles en el panel
+                    // Si la brigada está activada, mostrar OAs en el panel
                     if (listItem.classList.contains('activated')) {
-                        showDetails(brigade);
+                        showOAs(brigade);
                     }
                 });
             });
@@ -448,6 +404,30 @@
                 // Abrir el popup
                 brigadeMarkers[brigade.id].openPopup();
             }
+        }
+
+        // Mostrar OAs asignadas a la brigada
+        function showOAs(brigade) {
+            const oaPanel = document.getElementById('oa-panel');
+            const oaList = document.getElementById('oa-list');
+            oaList.innerHTML = ''; // Limpiar lista
+
+            // Agregar nombre de la brigada
+            oaPanel.querySelector('h5').textContent = 'Casos de ' + brigade.name;
+
+            // Agregar cada OA a la lista
+            brigade.oas.forEach(oa => {
+                const oaItem = document.createElement('li');
+                oaItem.className = 'list-group-item';
+                oaItem.textContent = `OA ${oa.id} - ${oa.estado}`;
+                oaList.appendChild(oaItem);
+            });
+
+            // Mostrar el panel de OAs
+            oaPanel.style.display = 'block';
+
+            // Ajustar el mapa
+            document.body.classList.add('oa-visible');
         }
 
         // Filtrar brigadas
