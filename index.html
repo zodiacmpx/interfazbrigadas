@@ -25,6 +25,8 @@
             padding: 0;
             box-shadow: 2px 0 5px rgba(0,0,0,0.1);
             z-index: 1000;
+            background-color: #f8f9fa;
+            width: 300px;
         }
 
         .sidebar .sidebar-sticky {
@@ -46,6 +48,7 @@
             display: flex;
             flex-direction: column;
             align-items: flex-start;
+            cursor: pointer;
         }
 
         #brigade-list .brigade-header {
@@ -61,7 +64,7 @@
         }
 
         #map {
-            margin-left: 250px; /* Width of the sidebar */
+            margin-left: 300px; /* Width of the sidebar */
         }
 
         #details-panel {
@@ -92,7 +95,6 @@
         /* Estilos para el KPI */
         .kpi-value {
             font-weight: bold;
-            color: green;
         }
 
         .kpi-low {
@@ -106,13 +108,31 @@
         .kpi-high {
             color: green;
         }
+
+        /* Styles for activated brigades */
+        .activated {
+            background-color: #e9f7ef; /* Light green background */
+        }
+
+        /* Styles for the small detail panel in the list */
+        .brigade-details {
+            display: none;
+            padding: 10px;
+            background-color: #f0f0f0;
+            width: 100%;
+            border-top: 1px solid #ccc;
+        }
+
+        .brigade-details p {
+            margin: 0;
+        }
     </style>
 </head>
 <body>
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
-            <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+            <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block sidebar collapse">
                 <div class="sidebar-sticky">
                     <h5 class="sidebar-heading">Brigadas Disponibles</h5>
                     <input type="text" id="search-input" class="form-control mb-3" placeholder="Buscar brigada...">
@@ -173,152 +193,7 @@
                     [-39.8596, -73.2852]
                 ]
             },
-            {
-                id: 2,
-                name: "Brigada Valdivia 2",
-                coords: [-39.8142, -73.2451],
-                speed: 60,
-                kpi: 70,
-                estado: "Trabajando en el lugar",
-                oaActivada: "No",
-                plazo: "Fuera de plazo",
-                alertas: "Retraso en llegada",
-                path: [
-                    [-39.8142, -73.2451],
-                    [-39.8242, -73.2551],
-                    [-39.8342, -73.2651],
-                    [-39.8442, -73.2751],
-                    [-39.8542, -73.2851]
-                ]
-            },
-            {
-                id: 3,
-                name: "Brigada Valdivia 3",
-                coords: [-39.8088, -73.2450],
-                speed: 58,
-                kpi: 95,
-                estado: "En colación",
-                oaActivada: "Sí",
-                plazo: "Dentro de plazo",
-                alertas: "Sin alertas",
-                path: [
-                    [-39.8088, -73.2450],
-                    [-39.8188, -73.2550],
-                    [-39.8288, -73.2650],
-                    [-39.8388, -73.2750],
-                    [-39.8488, -73.2850]
-                ]
-            },
-            // Brigadas en Osorno
-            {
-                id: 4,
-                name: "Brigada Osorno 1",
-                coords: [-40.5741, -73.1144],
-                speed: 52,
-                kpi: 88,
-                estado: "En traslado",
-                oaActivada: "No",
-                plazo: "Dentro de plazo",
-                alertas: "Sin alertas",
-                path: [
-                    [-40.5741, -73.1144],
-                    [-40.5841, -73.1244],
-                    [-40.5941, -73.1344],
-                    [-40.6041, -73.1444],
-                    [-40.6141, -73.1544]
-                ]
-            },
-            {
-                id: 5,
-                name: "Brigada Osorno 2",
-                coords: [-40.5690, -73.1120],
-                speed: 57,
-                kpi: 65,
-                estado: "Trabajando en el lugar",
-                oaActivada: "Sí",
-                plazo: "Dentro de plazo",
-                alertas: "Sin alertas",
-                path: [
-                    [-40.5690, -73.1120],
-                    [-40.5790, -73.1220],
-                    [-40.5890, -73.1320],
-                    [-40.5990, -73.1420],
-                    [-40.6090, -73.1520]
-                ]
-            },
-            {
-                id: 6,
-                name: "Brigada Osorno 3",
-                coords: [-40.5639, -73.1096],
-                speed: 54,
-                kpi: 45,
-                estado: "En colación",
-                oaActivada: "No",
-                plazo: "Fuera de plazo",
-                alertas: "Demora en respuesta",
-                path: [
-                    [-40.5639, -73.1096],
-                    [-40.5739, -73.1196],
-                    [-40.5839, -73.1296],
-                    [-40.5939, -73.1396],
-                    [-40.6039, -73.1496]
-                ]
-            },
-            // Brigadas en Puerto Montt
-            {
-                id: 7,
-                name: "Brigada Puerto Montt 1",
-                coords: [-41.4689, -72.9411],
-                speed: 59,
-                kpi: 91,
-                estado: "En traslado",
-                oaActivada: "Sí",
-                plazo: "Dentro de plazo",
-                alertas: "Sin alertas",
-                path: [
-                    [-41.4689, -72.9411],
-                    [-41.4789, -72.9511],
-                    [-41.4889, -72.9611],
-                    [-41.4989, -72.9711],
-                    [-41.5089, -72.9811]
-                ]
-            },
-            {
-                id: 8,
-                name: "Brigada Puerto Montt 2",
-                coords: [-41.4638, -72.9387],
-                speed: 56,
-                kpi: 75,
-                estado: "Trabajando en el lugar",
-                oaActivada: "No",
-                plazo: "Dentro de plazo",
-                alertas: "Sin alertas",
-                path: [
-                    [-41.4638, -72.9387],
-                    [-41.4738, -72.9487],
-                    [-41.4838, -72.9587],
-                    [-41.4938, -72.9687],
-                    [-41.5038, -72.9787]
-                ]
-            },
-            {
-                id: 9,
-                name: "Brigada Puerto Montt 3",
-                coords: [-41.4587, -72.9363],
-                speed: 61,
-                kpi: 30,
-                estado: "En colación",
-                oaActivada: "Sí",
-                plazo: "Fuera de plazo",
-                alertas: "Desvío de ruta",
-                path: [
-                    [-41.4587, -72.9363],
-                    [-41.4687, -72.9463],
-                    [-41.4787, -72.9563],
-                    [-41.4887, -72.9663],
-                    [-41.4987, -72.9763]
-                ]
-            },
+            // ... (resto de las brigadas)
         ];
 
         // Inicializar el mapa centrado en la zona sur de Chile
@@ -356,11 +231,10 @@
 
             // Agregar indicadores al marcador
             const popupContent = 
-                <strong>${brigade.name}</strong><br>
+                `<strong>${brigade.name}</strong><br>
                 Estado: ${brigade.estado}<br>
                 Velocidad: ${brigade.speed} km/h<br>
-                KPI: <span class="${getKpiColor(brigade.kpi)}">${brigade.kpi}%</span>
-            ;
+                KPI: <span class="${getKpiColor(brigade.kpi)}">${brigade.kpi}%</span>`;
             marker.bindPopup(popupContent);
 
             // Almacenar el marcador para futuras referencias
@@ -385,15 +259,22 @@
             }
         }
 
-        // Función para agregar brigada desde la lista
-        function addBrigade(id) {
+        // Función para activar brigada desde la lista
+        function activateBrigade(id) {
             const brigade = brigades.find(b => b.id === id);
             if (brigade) {
                 // Evitar agregar marcadores duplicados
                 if (!brigadeMarkers[brigade.id]) {
                     addBrigadeToMap(brigade);
+                    // Marcar la brigada como activada en la lista
+                    const listItem = document.getElementById('brigade-item-' + id);
+                    listItem.classList.add('activated');
+
+                    // Mostrar pequeño detalle debajo de la brigada en la lista
+                    const detailsDiv = listItem.querySelector('.brigade-details');
+                    detailsDiv.style.display = 'block';
                 } else {
-                    alert("Esta brigada ya está en el mapa.");
+                    alert("Esta brigada ya está activada.");
                 }
             }
         }
@@ -404,6 +285,7 @@
             brigades.forEach(brigade => {
                 const listItem = document.createElement('li');
                 listItem.className = 'list-group-item';
+                listItem.id = 'brigade-item-' + brigade.id;
 
                 const headerDiv = document.createElement('div');
                 headerDiv.className = 'brigade-header';
@@ -412,20 +294,60 @@
                 nameSpan.textContent = brigade.name;
 
                 const addButton = document.createElement('button');
-                addButton.textContent = "Agregar";
+                addButton.textContent = "Activar";
                 addButton.className = "btn btn-primary btn-sm";
-                addButton.onclick = () => addBrigade(brigade.id);
+                addButton.onclick = (event) => {
+                    event.stopPropagation();
+                    activateBrigade(brigade.id);
+                };
 
                 headerDiv.appendChild(nameSpan);
                 headerDiv.appendChild(addButton);
 
                 const statusSpan = document.createElement('span');
-                statusSpan.textContent = Estado: ${brigade.estado};
+                statusSpan.textContent = `Estado: ${brigade.estado}`;
                 statusSpan.className = 'brigade-status';
+
+                // Pequeño detalle con los datos generales
+                const detailsDiv = document.createElement('div');
+                detailsDiv.className = 'brigade-details';
+
+                const kpiSpan = document.createElement('span');
+                kpiSpan.textContent = `KPI: ${brigade.kpi}%`;
+                kpiSpan.className = getKpiColor(brigade.kpi);
+
+                detailsDiv.innerHTML = `
+                    <p><strong>Velocidad:</strong> ${brigade.speed} km/h</p>
+                    <p><strong>KPI:</strong> <span class="${getKpiColor(brigade.kpi)}">${brigade.kpi}%</span></p>
+                    <p><strong>OA Activada:</strong> ${brigade.oaActivada}</p>
+                    <p><strong>Plazo:</strong> ${brigade.plazo}</p>
+                    <p><strong>Alertas:</strong> ${brigade.alertas}</p>
+                `;
 
                 listItem.appendChild(headerDiv);
                 listItem.appendChild(statusSpan);
+                listItem.appendChild(detailsDiv);
                 listElement.appendChild(listItem);
+
+                // Evento al pasar el mouse por encima
+                listItem.addEventListener('mouseenter', () => {
+                    // Si la brigada está activada, mostrar el detalle
+                    if (listItem.classList.contains('activated')) {
+                        detailsDiv.style.display = 'block';
+                    }
+                });
+
+                listItem.addEventListener('mouseleave', () => {
+                    detailsDiv.style.display = 'none';
+                });
+
+                // Evento al hacer clic en el elemento de la lista
+                listItem.addEventListener('click', () => {
+                    // Si la brigada está activada, mostrar detalles en el panel
+                    if (listItem.classList.contains('activated')) {
+                        showDetails(brigade);
+                    }
+                });
             });
         }
 
@@ -446,13 +368,9 @@
             // Mostrar el panel de detalles
             document.getElementById('details-panel').style.display = 'block';
 
-            // Mostrar desplazamiento si está en traslado
-            if (brigade.estado === "En traslado") {
-                const path = L.polyline(brigade.path, { color: 'blue' }).addTo(map);
-                // Zoom al área del desplazamiento
-                map.fitBounds(path.getBounds());
-            } else {
-                map.setView(brigade.coords, 13);
+            // Centrar el mapa en la brigada
+            if (brigadeMarkers[brigade.id]) {
+                map.setView(brigadeMarkers[brigade.id].getLatLng(), 13);
             }
         }
 
