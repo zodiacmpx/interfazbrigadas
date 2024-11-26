@@ -207,7 +207,6 @@
                     { id: 40405061, estado: "Pendiente" }
                 ]
             },
-            // Agrega OAs para las demás brigadas...
             // Brigadas en Osorno
             {
                 id: 3,
@@ -281,6 +280,7 @@
             // Evento al hacer clic en el marcador
             marker.on('click', function () {
                 showDetails(brigade);
+                showOAs(brigade);
             });
 
             // Simular movimiento en tiempo real si está en traslado
@@ -373,8 +373,9 @@
 
                 // Evento al hacer clic en el elemento de la lista
                 listItem.addEventListener('click', () => {
-                    // Si la brigada está activada, mostrar OAs en el panel
+                    // Si la brigada está activada, mostrar detalles y OAs
                     if (listItem.classList.contains('activated')) {
+                        showDetails(brigade);
                         showOAs(brigade);
                     }
                 });
