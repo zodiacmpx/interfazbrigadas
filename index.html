@@ -111,6 +111,46 @@
         .highlight-marker {
             transform: scale(1.5);
         }
+
+        /* Styles for notifications */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #fff;
+            border-left: 5px solid #007bff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            padding: 15px;
+            margin-bottom: 10px;
+            width: 300px;
+            z-index: 1002;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .notification h6 {
+            margin: 0 0 10px 0;
+        }
+
+        .notification p {
+            margin: 0 0 10px 0;
+        }
+
+        .notification .btn-group {
+            align-self: flex-end;
+        }
+
+        .notification.warning {
+            border-left-color: #ffc107;
+        }
+
+        .notification.danger {
+            border-left-color: #dc3545;
+        }
+
+        .notification.info {
+            border-left-color: #17a2b8;
+        }
     </style>
 </head>
 <body>
@@ -460,6 +500,69 @@
 
         // Inicializar la aplicación
         loadBrigadeList();
+
+        // --- Sistema de Notificaciones/Alertas ---
+        const alerts = [
+            {
+                message: "Caso 40400586: 5 horas pendientes sin gestionar",
+                type: "danger"
+            },
+            {
+                message: "Brigada sin casos desde ingreso a las 8 hrs",
+                type: "warning"
+            },
+            {
+                message: "30 min sin tareas asignadas a Brigada Osorno 2",
+                type: "info"
+            },
+            {
+                message: "OA 40405065: Tiempo excedido en resolución",
+                type: "danger"
+            }
+        ];
+
+        function showNotification(alert) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${alert.type}`;
+            notification.innerHTML = `
+                <h6>Alerta</h6>
+                <p>${alert.message}</p>
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-primary">Asignar</button>
+                    <button class="btn btn-sm btn-secondary">Aplazar</button>
+                </div>
+            `;
+
+            // Evento para el botón "Aplazar"
+            notification.querySelector('.btn-secondary').addEventListener('click', () => {
+                notification.remove();
+            });
+
+            // Evento para el botón "Asignar" (puedes agregar funcionalidad aquí)
+            notification.querySelector('.btn-primary').addEventListener('click', () => {
+                alert("Funcionalidad de asignación no implementada.");
+                notification.remove();
+            });
+
+            document.body.appendChild(notification);
+        }
+
+        function startNotifications() {
+            // Generar una alerta aleatoria cada 3 minutos (180,000 ms)
+            setInterval(() => {
+                const randomAlert = alerts[Math.floor(Math.random() * alerts.length)];
+                showNotification(randomAlert);
+            }, 180000); // 180000 ms = 3 minutos
+
+            // Para demostración, mostrar una alerta inicial después de 5 segundos
+            setTimeout(() => {
+                const randomAlert = alerts[Math.floor(Math.random() * alerts.length)];
+                showNotification(randomAlert);
+            }, 5000);
+        }
+
+        // Iniciar el sistema de notificaciones
+        startNotifications();
     </script>
 </body>
 </html>
