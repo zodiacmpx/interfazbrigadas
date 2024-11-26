@@ -241,8 +241,9 @@
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
 
-        // Referencia para los marcadores de brigadas en el mapa
+        // Referencia para los marcadores y rutas de brigadas en el mapa
         const brigadeMarkers = {};
+        const brigadePaths = {};
 
         // Función para determinar el color del KPI
         function getKpiColor(kpi) {
@@ -277,26 +278,35 @@
             // Almacenar el marcador para futuras referencias
             brigadeMarkers[brigade.id] = marker;
 
+            // Mostrar ruta si está en traslado
+            if (brigade.estado === "En traslado") {
+                const polyline = L.polyline(brigade.path, { color: 'blue' }).addTo(map);
+                brigadePaths[brigade.id] = polyline;
+
+                // Simular movimiento
+                simulateMovement(brigade, marker, polyline);
+            }
+
             // Evento al hacer clic en el marcador
             marker.on('click', function () {
                 showDetails(brigade);
                 showOAs(brigade);
             });
-
-            // Simular movimiento en tiempo real si está en traslado
-            if (brigade.estado === "En traslado") {
-                simulateMovement(brigade, marker);
-            }
         }
 
         // Función para simular el movimiento de la brigada
-        function simulateMovement(brigade, marker) {
+        function simulateMovement(brigade, marker, polyline) {
             let index = 0;
             const path = brigade.path;
 
             function moveMarker() {
                 if (index < path.length) {
                     marker.setLatLng(path[index]);
+
+                    // Actualizar ruta recorrida
+                    const traveledPath = path.slice(0, index + 1);
+                    polyline.setLatLngs(traveledPath);
+
                     index++;
                 } else {
                     index = 0; // Reiniciar para que se repita
