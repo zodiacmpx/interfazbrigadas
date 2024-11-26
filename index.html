@@ -193,11 +193,7 @@
                 plazo: "Fuera de plazo",
                 alertas: "Retraso en llegada",
                 path: [
-                    [-39.8142, -73.2451],
-                    [-39.8242, -73.2551],
-                    [-39.8342, -73.2651],
-                    [-39.8442, -73.2751],
-                    [-39.8542, -73.2851]
+                    [-39.8142, -73.2451]
                 ]
             },
             // Brigadas en Osorno
@@ -230,14 +226,9 @@
                 plazo: "Dentro de plazo",
                 alertas: "Sin alertas",
                 path: [
-                    [-40.5690, -73.1120],
-                    [-40.5790, -73.1220],
-                    [-40.5890, -73.1320],
-                    [-40.5990, -73.1420],
-                    [-40.6090, -73.1520]
+                    [-40.5690, -73.1120]
                 ]
             },
-            // Brigadas en Temuco
             {
                 id: 5,
                 name: "Brigada Temuco 1",
@@ -267,14 +258,9 @@
                 plazo: "Fuera de plazo",
                 alertas: "Retraso en inicio",
                 path: [
-                    [-38.7400, -72.5950],
-                    [-38.7500, -72.6050],
-                    [-38.7600, -72.6150],
-                    [-38.7700, -72.6250],
-                    [-38.7800, -72.6350]
+                    [-38.7400, -72.5950]
                 ]
             },
-            // Más brigadas en Osorno
             {
                 id: 7,
                 name: "Brigada Osorno 3",
@@ -286,14 +272,10 @@
                 plazo: "Fuera de plazo",
                 alertas: "Demora en respuesta",
                 path: [
-                    [-40.5639, -73.1096],
-                    [-40.5739, -73.1196],
-                    [-40.5839, -73.1296],
-                    [-40.5939, -73.1396],
-                    [-40.6039, -73.1496]
+                    [-40.5639, -73.1096]
                 ]
             },
-            // Puedes agregar más brigadas si lo deseas
+            // Agregar más brigadas si lo deseas
         ];
 
         // Inicializar el mapa centrado en la zona sur de Chile
@@ -321,7 +303,7 @@
         // Función para agregar brigada al mapa
         function addBrigadeToMap(brigade) {
             const customIcon = L.icon({
-                iconUrl: 'https://img.icons8.com/color/48/000000/electricity.png',
+                iconUrl: 'https://img.icons8.com/ios-filled/50/000000/workers-male.png', // Icono de brigada
                 iconSize: [32, 32],
                 iconAnchor: [16, 32],
                 popupAnchor: [0, -32],
@@ -344,6 +326,28 @@
             marker.on('click', function () {
                 showDetails(brigade);
             });
+
+            // Simular movimiento en tiempo real si está en traslado
+            if (brigade.estado === "En traslado") {
+                simulateMovement(brigade, marker);
+            }
+        }
+
+        // Función para simular el movimiento de la brigada
+        function simulateMovement(brigade, marker) {
+            let index = 0;
+            const path = brigade.path;
+
+            function moveMarker() {
+                if (index < path.length) {
+                    marker.setLatLng(path[index]);
+                    index++;
+                } else {
+                    index = 0; // Reiniciar para que se repita
+                }
+            }
+
+            setInterval(moveMarker, 2000); // Actualiza cada 2 segundos
         }
 
         // Función para activar brigada desde la lista
@@ -468,4 +472,3 @@
     </script>
 </body>
 </html>
-
