@@ -548,11 +548,11 @@
         }
 
         function startNotifications() {
-            // Generar una alerta aleatoria cada 3 minutos (180,000 ms)
+            // Generar una alerta aleatoria cada 15 segundos (15000 ms)
             setInterval(() => {
                 const randomAlert = alerts[Math.floor(Math.random() * alerts.length)];
                 showNotification(randomAlert);
-            }, 180000); // 180000 ms = 3 minutos
+            }, 15000); // 180000 ms = 3 minutos
 
             // Para demostración, mostrar una alerta inicial después de 5 segundos
             setTimeout(() => {
