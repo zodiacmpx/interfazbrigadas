@@ -22,17 +22,17 @@
             top: 0;
             bottom: 0;
             left: 0;
-            width: 250px;
             padding: 0;
             box-shadow: 2px 0 5px rgba(0,0,0,0.1);
             z-index: 1000;
             background-color: #f8f9fa;
+            width: 300px;
         }
 
         .sidebar .sidebar-sticky {
             position: relative;
             top: 0;
-            height: 100vh;
+            height: calc(100vh - 0px);
             padding-top: 20px;
             overflow-x: hidden;
             overflow-y: auto;
@@ -48,6 +48,7 @@
             display: flex;
             flex-direction: column;
             align-items: flex-start;
+            cursor: pointer;
         }
 
         #brigade-list .brigade-header {
@@ -63,7 +64,7 @@
         }
 
         #map {
-            margin-left: 250px; /* Width of the sidebar */
+            margin-left: 300px; /* Width of the sidebar */
         }
 
         #details-panel {
@@ -73,13 +74,25 @@
             width: 350px;
             display: none;
             z-index: 1001;
-            transition: all 0.3s ease-in-out;
         }
 
-        #details-panel.active {
-            display: block;
+        @media (max-width: 768px) {
+            #map {
+                margin-left: 0;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+
+            #details-panel {
+                width: 90%;
+            }
         }
 
+        /* Estilos para el KPI */
         .kpi-value {
             font-weight: bold;
         }
@@ -95,27 +108,46 @@
         .kpi-high {
             color: green;
         }
+
+        /* Styles for activated brigades */
+        .activated {
+            background-color: #e9f7ef; /* Light green background */
+        }
+
+        /* Styles for the small detail panel in the list */
+        .brigade-details {
+            display: none;
+            padding: 10px;
+            background-color: #f0f0f0;
+            width: 100%;
+            border-top: 1px solid #ccc;
+        }
+
+        .brigade-details p {
+            margin: 0;
+        }
     </style>
 </head>
 <body>
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
-            <nav id="sidebar" class="sidebar">
+            <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block sidebar collapse">
                 <div class="sidebar-sticky">
                     <h5 class="sidebar-heading">Brigadas Disponibles</h5>
                     <input type="text" id="search-input" class="form-control mb-3" placeholder="Buscar brigada...">
-                    <ul id="brigade-list" class="list-group"></ul>
+                    <ul id="brigade-list" class="list-group">
+                        <!-- Lista de brigadas -->
+                    </ul>
                 </div>
             </nav>
             <!-- Main Content -->
-            <main role="main" id="main-content">
+            <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-0">
                 <div id="map"></div>
                 <!-- Panel de detalles -->
                 <div id="details-panel" class="card">
                     <div class="card-header">
                         <h5 id="brigade-name">Nombre de la Brigada</h5>
-                        <button id="close-details" class="btn btn-sm btn-danger float-right">X</button>
                     </div>
                     <div class="card-body">
                         <p><strong>Estado:</strong> <span id="brigade-status"></span></p>
@@ -124,22 +156,25 @@
                         <p><strong>OA Activada:</strong> <span id="brigade-oa"></span></p>
                         <p><strong>Dentro de plazo según densidad:</strong> <span id="brigade-plazo"></span></p>
                         <p><strong>Alertas/Notificaciones:</strong> <span id="brigade-alertas"></span></p>
-                        <button class="btn btn-danger btn-sm mt-2" id="remove-brigade">Eliminar del Mapa</button>
                     </div>
                 </div>
             </main>
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- Bootstrap JS and dependencies -->
     <script src="https://code.jquery.com/jquery-3.5.0.min.js"></script>
+    <!-- Popper.js -->
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <!-- Bootstrap JS -->
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+    <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <!-- Custom JS -->
     <script>
-        // Datos de brigadas
+        // Datos de ejemplo para las brigadas en Chile
         const brigades = [
-            // Aquí se mantiene la estructura original de las brigadas
+            // Brigadas en Valdivia
             {
                 id: 1,
                 name: "Brigada Valdivia 1",
@@ -150,83 +185,214 @@
                 oaActivada: "Sí",
                 plazo: "Dentro de plazo",
                 alertas: "Sin alertas",
-                path: [[-39.8196, -73.2452], [-39.8296, -73.2552]]
+                path: [
+                    [-39.8196, -73.2452],
+                    [-39.8296, -73.2552],
+                    [-39.8396, -73.2652],
+                    [-39.8496, -73.2752],
+                    [-39.8596, -73.2852]
+                ]
             },
-            // Agrega más brigadas aquí...
+            // ... (resto de las brigadas)
         ];
 
+        // Inicializar el mapa centrado en la zona sur de Chile
         const map = L.map('map').setView([-40.5, -73.0], 7);
 
-        // Cargar mapa base
+        // Añadir capa de mapa
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
 
+        // Referencia para los marcadores de brigadas en el mapa
         const brigadeMarkers = {};
 
+        // Función para determinar el color del KPI
         function getKpiColor(kpi) {
-            if (kpi >= 80) return 'kpi-high';
-            if (kpi >= 50) return 'kpi-medium';
-            return 'kpi-low';
-        }
-
-        function addBrigadeToMap(brigade) {
-            const marker = L.marker(brigade.coords).addTo(map);
-            marker.bindPopup(`<strong>${brigade.name}</strong>`);
-
-            marker.on('click', () => showDetails(brigade));
-            brigadeMarkers[brigade.id] = marker;
-        }
-
-        function showDetails(brigade) {
-            document.getElementById('brigade-name').textContent = brigade.name;
-            document.getElementById('brigade-status').textContent = brigade.estado;
-            document.getElementById('brigade-speed').textContent = brigade.speed + ' km/h';
-            const kpiElement = document.getElementById('brigade-kpi');
-            kpiElement.textContent = brigade.kpi + '%';
-            kpiElement.className = 'kpi-value ' + getKpiColor(brigade.kpi);
-            document.getElementById('brigade-oa').textContent = brigade.oaActivada;
-            document.getElementById('brigade-plazo').textContent = brigade.plazo;
-            document.getElementById('brigade-alertas').textContent = brigade.alertas;
-
-            const panel = document.getElementById('details-panel');
-            panel.classList.add('active');
-
-            const removeButton = document.getElementById('remove-brigade');
-            removeButton.onclick = () => removeBrigade(brigade.id);
-        }
-
-        function removeBrigade(id) {
-            if (brigadeMarkers[id]) {
-                map.removeLayer(brigadeMarkers[id]);
-                delete brigadeMarkers[id];
-                document.getElementById('details-panel').classList.remove('active');
+            if (kpi >= 80) {
+                return 'kpi-high'; // Verde
+            } else if (kpi >= 50) {
+                return 'kpi-medium'; // Naranja
+            } else {
+                return 'kpi-low'; // Rojo
             }
         }
 
-        document.getElementById('close-details').addEventListener('click', () => {
-            document.getElementById('details-panel').classList.remove('active');
-        });
+        // Función para agregar brigada al mapa
+        function addBrigadeToMap(brigade) {
+            const customIcon = L.icon({
+                iconUrl: 'https://img.icons8.com/color/48/000000/electricity.png',
+                iconSize: [32, 32],
+                iconAnchor: [16, 32],
+                popupAnchor: [0, -32],
+            });
 
+            const marker = L.marker(brigade.coords, { icon: customIcon }).addTo(map);
+
+            // Agregar indicadores al marcador
+            const popupContent = 
+                `<strong>${brigade.name}</strong><br>
+                Estado: ${brigade.estado}<br>
+                Velocidad: ${brigade.speed} km/h<br>
+                KPI: <span class="${getKpiColor(brigade.kpi)}">${brigade.kpi}%</span>`;
+            marker.bindPopup(popupContent);
+
+            // Almacenar el marcador para futuras referencias
+            brigadeMarkers[brigade.id] = marker;
+
+            // Evento al hacer clic en el marcador
+            marker.on('click', function () {
+                showDetails(brigade);
+            });
+
+            // Simular movimiento en tiempo real si está en traslado
+            if (brigade.estado === "En traslado") {
+                let index = 0;
+                setInterval(() => {
+                    if (index < brigade.path.length) {
+                        marker.setLatLng(brigade.path[index]);
+                        index++;
+                    } else {
+                        index = 0; // Reiniciar para que se repita
+                    }
+                }, 2000); // Actualiza cada 2 segundos
+            }
+        }
+
+        // Función para activar brigada desde la lista
+        function activateBrigade(id) {
+            const brigade = brigades.find(b => b.id === id);
+            if (brigade) {
+                // Evitar agregar marcadores duplicados
+                if (!brigadeMarkers[brigade.id]) {
+                    addBrigadeToMap(brigade);
+                    // Marcar la brigada como activada en la lista
+                    const listItem = document.getElementById('brigade-item-' + id);
+                    listItem.classList.add('activated');
+
+                    // Mostrar pequeño detalle debajo de la brigada en la lista
+                    const detailsDiv = listItem.querySelector('.brigade-details');
+                    detailsDiv.style.display = 'block';
+                } else {
+                    alert("Esta brigada ya está activada.");
+                }
+            }
+        }
+
+        // Cargar lista de brigadas
         function loadBrigadeList() {
             const listElement = document.getElementById('brigade-list');
             brigades.forEach(brigade => {
                 const listItem = document.createElement('li');
                 listItem.className = 'list-group-item';
-                listItem.innerHTML = `
-                    <div class="brigade-header">
-                        <span>${brigade.name}</span>
-                        <button class="btn btn-primary btn-sm">Agregar</button>
-                    </div>
-                    <span class="brigade-status">Estado: ${brigade.estado}</span>
+                listItem.id = 'brigade-item-' + brigade.id;
+
+                const headerDiv = document.createElement('div');
+                headerDiv.className = 'brigade-header';
+
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = brigade.name;
+
+                const addButton = document.createElement('button');
+                addButton.textContent = "Activar";
+                addButton.className = "btn btn-primary btn-sm";
+                addButton.onclick = (event) => {
+                    event.stopPropagation();
+                    activateBrigade(brigade.id);
+                };
+
+                headerDiv.appendChild(nameSpan);
+                headerDiv.appendChild(addButton);
+
+                const statusSpan = document.createElement('span');
+                statusSpan.textContent = `Estado: ${brigade.estado}`;
+                statusSpan.className = 'brigade-status';
+
+                // Pequeño detalle con los datos generales
+                const detailsDiv = document.createElement('div');
+                detailsDiv.className = 'brigade-details';
+
+                const kpiSpan = document.createElement('span');
+                kpiSpan.textContent = `KPI: ${brigade.kpi}%`;
+                kpiSpan.className = getKpiColor(brigade.kpi);
+
+                detailsDiv.innerHTML = `
+                    <p><strong>Velocidad:</strong> ${brigade.speed} km/h</p>
+                    <p><strong>KPI:</strong> <span class="${getKpiColor(brigade.kpi)}">${brigade.kpi}%</span></p>
+                    <p><strong>OA Activada:</strong> ${brigade.oaActivada}</p>
+                    <p><strong>Plazo:</strong> ${brigade.plazo}</p>
+                    <p><strong>Alertas:</strong> ${brigade.alertas}</p>
                 `;
-                listItem.querySelector('button').onclick = () => addBrigadeToMap(brigade);
+
+                listItem.appendChild(headerDiv);
+                listItem.appendChild(statusSpan);
+                listItem.appendChild(detailsDiv);
                 listElement.appendChild(listItem);
+
+                // Evento al pasar el mouse por encima
+                listItem.addEventListener('mouseenter', () => {
+                    // Si la brigada está activada, mostrar el detalle
+                    if (listItem.classList.contains('activated')) {
+                        detailsDiv.style.display = 'block';
+                    }
+                });
+
+                listItem.addEventListener('mouseleave', () => {
+                    detailsDiv.style.display = 'none';
+                });
+
+                // Evento al hacer clic en el elemento de la lista
+                listItem.addEventListener('click', () => {
+                    // Si la brigada está activada, mostrar detalles en el panel
+                    if (listItem.classList.contains('activated')) {
+                        showDetails(brigade);
+                    }
+                });
             });
         }
 
+        // Mostrar detalles de la brigada
+        function showDetails(brigade) {
+            document.getElementById('brigade-name').textContent = brigade.name;
+            document.getElementById('brigade-status').textContent = brigade.estado;
+            document.getElementById('brigade-speed').textContent = brigade.speed + ' km/h';
+
+            const kpiElement = document.getElementById('brigade-kpi');
+            kpiElement.textContent = brigade.kpi + '%';
+            kpiElement.className = 'kpi-value ' + getKpiColor(brigade.kpi);
+
+            document.getElementById('brigade-oa').textContent = brigade.oaActivada;
+            document.getElementById('brigade-plazo').textContent = brigade.plazo;
+            document.getElementById('brigade-alertas').textContent = brigade.alertas;
+
+            // Mostrar el panel de detalles
+            document.getElementById('details-panel').style.display = 'block';
+
+            // Centrar el mapa en la brigada
+            if (brigadeMarkers[brigade.id]) {
+                map.setView(brigadeMarkers[brigade.id].getLatLng(), 13);
+            }
+        }
+
+        // Filtrar brigadas
+        function filterBrigades() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const listItems = document.querySelectorAll('#brigade-list .list-group-item');
+            listItems.forEach(item => {
+                const brigadeName = item.querySelector('.brigade-header span').textContent.toLowerCase();
+                if (brigadeName.includes(query)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // Evento de búsqueda
+        document.getElementById('search-input').addEventListener('input', filterBrigades);
+
+        // Inicializar la aplicación
         loadBrigadeList();
     </script>
 </body>
 </html>
-
